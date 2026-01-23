@@ -1,0 +1,19 @@
+# The main pipeline for Earthquake_Analysis_Bundle
+
+resources:
+  pipelines:
+    pipeline_earthquake_bronze_silver:
+      name: Earthquake_Bronze_Silver
+      configuration:
+        catalog_name: ${var.catalog}
+      libraries:
+        - glob:
+            include: ../src/DLT_pipelines/Bronze_Silver/transformations/**
+      schema: earthquake_clean
+      continuous: false
+      development: false
+      photon: true
+      channel: CURRENT
+      catalog: ${var.catalog}
+      serverless: true
+      root_path: ../src/DLT_pipelines/Bronze_Silver
