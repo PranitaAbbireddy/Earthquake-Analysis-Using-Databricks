@@ -1,0 +1,48 @@
+# This is a Databricks asset bundle definition for Earthquake_Analysis_Bundle.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: Earthquake_Analysis_Bundle
+  uuid: a9206959-910e-4cd7-936a-d1fdce4ad36f
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+  warehouse_id: 
+    description: Warehouse ID
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-6649a0c8-d999.cloud.databricks.com
+    variables:
+      catalog: earthquake_dev
+      schema: dev
+      warehouse_id: f03bea65be54b932 
+    presets:
+      artifacts_dynamic_version: true
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-6649a0c8-d999.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/pranita.triaright@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/pranita.triaright@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: earthquake_prod
+      schema: prod
+      warehouse_id: f03bea65be54b932
+    permissions:
+      - user_name: pranita.triaright@gmail.com
+        level: CAN_MANAGE

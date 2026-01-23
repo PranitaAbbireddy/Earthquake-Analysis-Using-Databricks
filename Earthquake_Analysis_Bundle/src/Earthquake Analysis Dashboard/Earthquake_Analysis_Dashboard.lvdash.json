@@ -1,0 +1,1228 @@
+{
+  "datasets": [
+    {
+      "name": "32f56044",
+      "displayName": "Earthquake Detail",
+      "queryLines": [
+        "SELECT\r\n",
+        "    *\r\n",
+        "FROM earthquake_clean.earthquake_data_final;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "eb04fe3e",
+      "displayName": "Earthquake Magnitude Distribution",
+      "queryLines": [
+        "WITH total AS (\r\n",
+        "  SELECT COUNT(*) AS total_events\r\n",
+        "  FROM earthquake_clean.earthquake_data_final\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  CASE\r\n",
+        "    WHEN mag < 2 THEN 'Micro (<2)'\r\n",
+        "    WHEN mag BETWEEN 2 AND 3 THEN 'Minor (2–3)'\r\n",
+        "    WHEN mag BETWEEN 3 AND 4 THEN 'Light (3–4)'\r\n",
+        "    ELSE 'Moderate+ (4+)'\r\n",
+        "  END AS magnitude_bucket,\r\n",
+        "  COUNT(*) AS event_count,\r\n",
+        "  ROUND(100.0 * COUNT(*) / t.total_events, 2) AS percentage\r\n",
+        "FROM earthquake_clean.earthquake_data_final, total t\r\n",
+        "GROUP BY magnitude_bucket, t.total_events\r\n",
+        "ORDER BY\r\n",
+        "  CASE magnitude_bucket\r\n",
+        "    WHEN 'Micro (<2)' THEN 1\r\n",
+        "    WHEN 'Minor (2–3)' THEN 2\r\n",
+        "    WHEN 'Light (3–4)' THEN 3\r\n",
+        "    ELSE 4\r\n",
+        "  END;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "fe1d595c",
+      "displayName": "Earthquake by Country",
+      "queryLines": [
+        "SELECT\r\n",
+        "    COUNT(*) AS event_count,\r\n",
+        "    CASE\r\n",
+        "        WHEN SIZE(SPLIT(place, ', ')) > 1 THEN SPLIT(place, ', ')[1]\r\n",
+        "        ELSE SPLIT(place, ', ')[0]\r\n",
+        "    END AS country\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN SIZE(SPLIT(place, ', ')) > 1 THEN SPLIT(place, ', ')[1]\r\n",
+        "        ELSE SPLIT(place, ', ')[0]\r\n",
+        "    END\r\n",
+        "ORDER BY event_count DESC;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "a89c8db4",
+      "displayName": "Earthquakes over Time",
+      "queryLines": [
+        "SELECT\r\n",
+        "    DATE(time) AS event_date,\r\n",
+        "    COUNT(*) AS total_events\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "GROUP BY DATE(time)\r\n",
+        "ORDER BY event_date;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "9330025a",
+      "displayName": "Top 10 Most Affected Countries",
+      "queryLines": [
+        "SELECT\r\n",
+        "    DATE(time) AS event_date,\r\n",
+        "    COUNT(*) AS total_events\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "GROUP BY DATE(time)\r\n",
+        "ORDER BY event_date\r\n",
+        "LIMIT 10;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "01ba1c2b",
+      "displayName": "Average Magnitude by Country",
+      "queryLines": [
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN SIZE(SPLIT(place, ', ')) > 1 THEN SPLIT(place, ', ')[1]\r\n",
+        "        ELSE SPLIT(place, ', ')[0]\r\n",
+        "    END AS country,\r\n",
+        "    ROUND(AVG(mag), 2) AS avg_magnitude\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "GROUP BY country\r\n",
+        "ORDER BY avg_magnitude DESC;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "ad3908cb",
+      "displayName": "Tsunami vs Non-Tsunami Events",
+      "queryLines": [
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN tsunami = 1 THEN 'Tsunami'\r\n",
+        "        ELSE 'No Tsunami'\r\n",
+        "    END AS tsunami_flag,\r\n",
+        "    COUNT(*) AS total_events\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "GROUP BY tsunami_flag;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "99db5890",
+      "displayName": "Depth vs Magnitude Relationship",
+      "queryLines": [
+        "SELECT\r\n",
+        "    depth,\r\n",
+        "    mag\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "WHERE depth IS NOT NULL\r\n",
+        "  AND mag IS NOT NULL\r\n",
+        "ORDER BY depth DESC;"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "fb086e29",
+      "displayName": "Strong Earthquake Events (Magnitude ≥ 5)",
+      "queryLines": [
+        "SELECT\r\n",
+        "    COUNT(*) AS strong_earthquakes\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "WHERE mag >= 5;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "2d8a926f",
+      "displayName": "Most Recent Major Earthquakes",
+      "queryLines": [
+        "SELECT\r\n",
+        "    time,\r\n",
+        "    place,\r\n",
+        "    mag,\r\n",
+        "    depth\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "WHERE mag >= 5\r\n",
+        "ORDER BY time DESC\r\n",
+        "LIMIT 10;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    },
+    {
+      "name": "2090746b",
+      "displayName": "Tsunami Events",
+      "queryLines": [
+        "SELECT time, COUNT(*) AS tsunami_events\r\n",
+        "FROM earthquake_clean.earthquake_data_final\r\n",
+        "WHERE tsunami = 1\r\n",
+        "GROUP BY time;\r\n"
+      ],
+      "catalog": "earthquake_dev",
+      "schema": "default"
+    }
+  ],
+  "pages": [
+    {
+      "name": "034c6a15",
+      "displayName": "Analysis Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "9e44555b",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"font-size: 48px;font-family: Georgia;line-height: 1.5;\">**EARTHQUAKE ANALYSIS DASHBOARD**</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "earthquake-events-by-country",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32f56044",
+                  "fields": [
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    },
+                    {
+                      "name": "place",
+                      "expression": "`place`"
+                    },
+                    {
+                      "name": "mag",
+                      "expression": "`mag`"
+                    },
+                    {
+                      "name": "time",
+                      "expression": "`time`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "place",
+                    "displayName": "Place"
+                  },
+                  {
+                    "fieldName": "mag",
+                    "displayName": "Magnitude"
+                  },
+                  {
+                    "fieldName": "time",
+                    "displayName": "Time of Occurence"
+                  }
+                ]
+              },
+              "mark": {
+                "size": -1.2
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Recent Earthquake Events"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "earthquake-events-by-magnitude",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "eb04fe3e",
+                  "fields": [
+                    {
+                      "name": "magnitude_bucket",
+                      "expression": "`magnitude_bucket`"
+                    },
+                    {
+                      "name": "event_count",
+                      "expression": "`event_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "magnitude_bucket",
+                  "axis": {
+                    "labelAngle": 0,
+                    "hideLabels": false
+                  },
+                  "displayName": "Magnitude Bucket",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Micro (<2)",
+                        "Minor (2–3)",
+                        "Light (3–4)",
+                        "Moderate+ (4+)"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "event_count",
+                  "axis": {
+                    "hideGrid": true
+                  },
+                  "displayName": "Total Events",
+                  "scale": {
+                    "type": "quantitative",
+                    "domain": {
+                      "min": 0
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "magnitude_bucket",
+                  "displayName": "Intensity",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Light (3–4)",
+                        "color": "#F8A211"
+                      },
+                      {
+                        "value": "Micro (<2)",
+                        "color": "#BDDD6C"
+                      },
+                      {
+                        "value": "Minor (2–3)",
+                        "color": "#FCE780"
+                      },
+                      {
+                        "value": "Moderate+ (4+)",
+                        "color": "#FC5847"
+                      },
+                      {
+                        "value": "Moderate (4+)",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Earthquake Events by Magnitude"
+              },
+              "mark": {
+                "layout": "stack"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "earthquake-events-trend-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a89c8db4",
+                  "fields": [
+                    {
+                      "name": "daily(event_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)"
+                    },
+                    {
+                      "name": "total_events",
+                      "expression": "`total_events`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(event_date)",
+                  "axis": {
+                    "hideGrid": true
+                  },
+                  "format": {
+                    "type": "date",
+                    "date": "year-month-day",
+                    "leadingZeros": true
+                  },
+                  "displayName": "Event Date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "total_events",
+                        "displayName": "Total Events"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    },
+                    "axis": {
+                      "hideGrid": true
+                    }
+                  },
+                  "secondary": {
+                    "fields": [],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Earthquake Events Trend Over Time"
+              },
+              "mark": {
+                "colors": [
+                  "#F89C5B",
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ],
+                "layout": "stack"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 28,
+            "width": 2,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "average-magnitude-by-country",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "01ba1c2b",
+                  "fields": [
+                    {
+                      "name": "avg_magnitude",
+                      "expression": "`avg_magnitude`"
+                    },
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "country",
+                  "axis": {
+                    "hideLabels": true
+                  },
+                  "displayName": "Country",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_magnitude",
+                  "axis": {
+                    "hideGrid": true,
+                    "hideLabels": true,
+                    "hideTitle": false
+                  },
+                  "displayName": "Average Magnitude",
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "color": {
+                  "fieldName": "avg_magnitude",
+                  "displayName": "Avg Scale",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "redyellowgreen"
+                    },
+                    "reverse": true
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Average Magnitude by Country"
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 20,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "tsunami-vs-non-tsunami-earthquakes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ad3908cb",
+                  "fields": [
+                    {
+                      "name": "total_events",
+                      "expression": "`total_events`"
+                    },
+                    {
+                      "name": "tsunami_flag",
+                      "expression": "`tsunami_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "total_events",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 0,
+                    "title": "Total Events",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": []
+                    }
+                  },
+                  {
+                    "fieldName": "tsunami_flag",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 1,
+                    "title": "Tsunami / No Tsunami",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Tsunami vs Non-Tsunami Earthquakes"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 10,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "earthquake-depth-vs-magnitude",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "99db5890",
+                  "fields": [
+                    {
+                      "name": "depth",
+                      "expression": "`depth`"
+                    },
+                    {
+                      "name": "mag",
+                      "expression": "`mag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "depth",
+                  "axis": {
+                    "hideGrid": true,
+                    "labelAngle": 45
+                  },
+                  "displayName": "Depth (km)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "mag",
+                  "axis": {
+                    "hideGrid": true
+                  },
+                  "displayName": "Magnitude",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Earthquake Depth vs Magnitude"
+              },
+              "mark": {
+                "opacity": 0.34
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 34,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "total-strong-earthquakes-magnitude-5",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fb086e29",
+                  "fields": [
+                    {
+                      "name": "strong_earthquakes",
+                      "expression": "`strong_earthquakes`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "strong_earthquakes",
+                  "style": {
+                    "bold": true,
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    },
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Strong Earthquakes (Magnitude ≥ 5)"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "latest-strong-earthquakes-mag-5",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2d8a926f",
+                  "fields": [
+                    {
+                      "name": "time",
+                      "expression": "`time`"
+                    },
+                    {
+                      "name": "place",
+                      "expression": "`place`"
+                    },
+                    {
+                      "name": "mag",
+                      "expression": "`mag`"
+                    },
+                    {
+                      "name": "depth",
+                      "expression": "`depth`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "time",
+                    "dateTimeFormat": "DD/MM/YYYY HH:mm:ss.SSS",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "datetime",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "Date / Time ",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "mag",
+                            "fn": ">=",
+                            "literal": "6"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 4
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fieldName": "place",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "Place",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "mag",
+                            "fn": ">=",
+                            "literal": "6"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 4
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fieldName": "mag",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "Magnitude",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "mag",
+                            "fn": ">=",
+                            "literal": "6"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 4
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fieldName": "depth",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "Depth",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "mag",
+                            "fn": ">=",
+                            "literal": "6"
+                          },
+                          "value": {
+                            "foregroundColor": {
+                              "themeColorType": "visualizationColors",
+                              "position": 4
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Latest Strong Earthquakes (Mag ≥ 5)"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 28,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total-earthquakes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32f56044",
+                  "fields": [
+                    {
+                      "name": "daily(time)",
+                      "expression": "DATE_TRUNC(\"DAY\", `time`)"
+                    },
+                    {
+                      "name": "count(id)",
+                      "expression": "COUNT(`id`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "DATE_TRUNC(\"DAY\", `time`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(id)"
+                },
+                "period": {
+                  "fieldName": "daily(time)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Earthquakes"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "tsunami-events",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2090746b",
+                  "fields": [
+                    {
+                      "name": "tsunami_events",
+                      "expression": "`tsunami_events`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "tsunami_events",
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 6
+                    },
+                    "bold": true,
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Tsunami Events"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "45e79f8b",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-family:Courier New;font-size:18px\">*This dashboard provides an overview of global earthquake activity, highlighting severity, geographic distribution, temporal trends, and high-risk seismic events.*</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 2,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#ECECEC",
+        "dark": "#11171C"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "widgetBorderColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#8ACAFF"
+      },
+      "visualizationColors": [
+        "#077A9D",
+        "#FFAB00",
+        "#00A972",
+        "#FF3621",
+        "#8BCAE7",
+        "#AB4057",
+        "#99DDB4",
+        "#FCA4A1",
+        "#919191",
+        "#BF7080"
+      ],
+      "widgetHeaderAlignment": "CENTER"
+    },
+    "applyModeEnabled": false
+  }
+}

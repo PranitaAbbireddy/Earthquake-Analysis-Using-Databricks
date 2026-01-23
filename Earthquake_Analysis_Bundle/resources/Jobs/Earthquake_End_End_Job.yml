@@ -1,0 +1,38 @@
+resources:
+  jobs:
+    Earthquake_End_End_Job:
+      name: Earthquake_End_End_Job
+      trigger:
+        pause_status: UNPAUSED
+        periodic:
+          interval: 1
+          unit: HOURS
+      tasks:
+        - task_key: Ingestion_Bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/pranita.triaright@gmail.com/Earthquake-Analysis-Using-Databricks/Earthquake-Analysis-Using-Databricks/Earthquake_Analysis_Bundle/src/Notebooks/Ingestion_Bronze.ipynb
+            base_parameters:
+              catalog_name: ${var.catalog}
+            source: WORKSPACE
+          max_retries: 1
+          min_retry_interval_millis: 120000
+          disable_auto_optimization: false
+        - task_key: Earthquake_Bronze_Silver
+          depends_on:
+            - task_key: Ingestion_Bronze
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.pipeline_earthquake_bronze_silver.id}
+            full_refresh: false
+        - task_key: Earthquake_Dashboard
+          depends_on:
+            - task_key: Earthquake_Bronze_Silver
+          dashboard_task:
+            subscription: {}
+            warehouse_id: f03bea65be54b932
+            dashboard_id: ${resources.dashboards.earthquake_monitor.id}
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog}
+      performance_target: PERFORMANCE_OPTIMIZED

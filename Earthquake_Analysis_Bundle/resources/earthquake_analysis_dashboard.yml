@@ -1,0 +1,7 @@
+resources:
+  dashboards:
+    earthquake_monitor:
+      display_name: 'Earthquake_Analysis_Dashboard'
+      file_path: ../src/Earthquake Analysis Dashboard/Earthquake_Analysis_Dashboard.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+     
