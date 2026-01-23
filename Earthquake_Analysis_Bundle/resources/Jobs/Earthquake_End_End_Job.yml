@@ -10,7 +10,7 @@ resources:
       tasks:
         - task_key: Ingestion_Bronze
           notebook_task:
-            notebook_path: /Workspace/Users/pranita.triaright@gmail.com/Earthquake-Analysis-Using-Databricks/Earthquake-Analysis-Using-Databricks/Earthquake_Analysis_Bundle/src/Notebooks/Ingestion_Bronze.ipynb
+            notebook_path: /Workspace/Users/pranita.triaright@gmail.com/Earthquake-Analysis-Using-Databricks/Earthquake-Analysis-Using-Databricks/Earthquake_Analysis_Bundle/src/Notebooks/Ingestion_Bronze
             base_parameters:
               catalog_name: ${var.catalog}
             source: WORKSPACE
