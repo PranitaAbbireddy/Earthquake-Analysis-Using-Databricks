@@ -1,4 +1,4 @@
-# Earthquake Analysis Using Databricks
+# Real-Time Earthquake Data Engineering Pipeline
 
 This repository contains a comprehensive data engineering pipeline and analytics dashboard for analyzing global earthquake data. The project leverages Databricks Asset Bundles (DAB), Delta Live Tables (DLT), and Databricks SQL Dashboards to ingest, process, and visualize real-time earthquake data from the United States Geological Survey (USGS).
 
