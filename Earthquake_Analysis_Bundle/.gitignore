@@ -8,3 +8,6 @@ scratch/**
 !scratch/README.md
 **/explorations/**
 **/!explorations/README.md
+
+# Local bundle overrides (contains workspace-specific values)
+databricks.override.yml
