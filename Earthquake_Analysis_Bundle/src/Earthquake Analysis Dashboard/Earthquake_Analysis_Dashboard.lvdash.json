@@ -5,7 +5,11 @@
       "displayName": "Earthquake Detail",
       "queryLines": [
         "SELECT\r\n",
-        "    *\r\n",
+        "    *,\r\n",
+        "    CASE\r\n",
+        "        WHEN tsunami = 1 THEN 'Tsunami Event'\r\n",
+        "        ELSE 'Non-Tsunami Event'\r\n",
+        "    END AS tsunami_flag\r\n",
         "FROM earthquake_clean.earthquake_data_final;\r\n"
       ],
       "catalog": "earthquake_dev",
@@ -172,10 +176,9 @@
       "name": "2090746b",
       "displayName": "Tsunami Events",
       "queryLines": [
-        "SELECT time, COUNT(*) AS tsunami_events\r\n",
+        "SELECT COUNT(*) AS tsunami_events\r\n",
         "FROM earthquake_clean.earthquake_data_final\r\n",
-        "WHERE tsunami = 1\r\n",
-        "GROUP BY time;\r\n"
+        "WHERE tsunami = 1;\r\n"
       ],
       "catalog": "earthquake_dev",
       "schema": "default"
@@ -211,6 +214,10 @@
                 "query": {
                   "datasetName": "32f56044",
                   "fields": [
+                    {
+                      "name": "tsunami",
+                      "expression": "`tsunami`"
+                    },
                     {
                       "name": "latitude",
                       "expression": "`latitude`"
@@ -248,6 +255,36 @@
                     "fieldName": "longitude"
                   }
                 },
+                "color": {
+                  "fieldName": "tsunami",
+                  "legend": {
+                    "hideTitle": true,
+                    "hide": true
+                  },
+                  "displayName": "Tsunami",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": 1,
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 6
+                        }
+                      },
+                      {
+                        "value": 0,
+                        "color": "#60A3B7"
+                      }
+                    ]
+                  }
+                },
+                "size": {
+                  "fieldName": "tsunami",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
                 "extra": [
                   {
                     "fieldName": "place",
@@ -263,12 +300,13 @@
                   }
                 ]
               },
-              "mark": {
-                "size": -1.2
-              },
               "frame": {
                 "showTitle": true,
                 "title": "Recent Earthquake Events"
+              },
+              "mark": {
+                "size": -2.7,
+                "opacity": 1
               }
             }
           },
@@ -807,7 +845,9 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Total Strong Earthquakes (Magnitude ≥ 5)"
+                "title": "Total Strong Earthquakes (Magnitude ≥ 5)",
+                "showDescription": false,
+                "description": ""
               }
             }
           },
@@ -1172,7 +1212,7 @@
             "name": "45e79f8b",
             "multilineTextboxSpec": {
               "lines": [
-                "<span style=\"font-family:Courier New;font-size:18px\">*This dashboard provides an overview of global earthquake activity, highlighting severity, geographic distribution, temporal trends, and high-risk seismic events.*</span>"
+                "<span style=\"font-family: Courier New;font-size: 20px;\">*This dashboard provides an overview of global earthquake activity, highlighting severity, geographic distribution, temporal trends, and high-risk seismic events since 20th January 2026.*</span>"
               ]
             }
           },
