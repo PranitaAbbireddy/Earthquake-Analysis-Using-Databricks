@@ -10,7 +10,7 @@ resources:
       tasks:
         - task_key: Ingestion_Bronze
           notebook_task:
-            notebook_path: /Workspace/Users/pranita.triaright@gmail.com/Earthquake-Analysis-Using-Databricks/Earthquake-Analysis-Using-Databricks/Earthquake_Analysis_Bundle/src/Notebooks/Ingestion_Bronze
+            notebook_path: /Workspace/Users/<your-email@example.com>/Earthquake-Analysis-Using-Databricks/Earthquake-Analysis-Using-Databricks/Earthquake_Analysis_Bundle/src/Notebooks/Ingestion_Bronze
             base_parameters:
               catalog_name: ${var.catalog}
             source: WORKSPACE
@@ -28,7 +28,7 @@ resources:
             - task_key: Earthquake_Bronze_Silver
           dashboard_task:
             subscription: {}
-            warehouse_id: f03bea65be54b932
+            warehouse_id: ${var.warehouse_id}
             dashboard_id: ${resources.dashboards.earthquake_monitor.id}
       queue:
         enabled: true

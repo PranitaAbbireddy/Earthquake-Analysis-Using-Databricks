@@ -1,7 +1,7 @@
 [project]
 name = "Earthquake_Analysis_Bundle"
 version = "0.0.1"
-authors = [{ name = "pranita.triaright@gmail.com" }]
+authors = [{ name = "<your-email@example.com>" }]
 requires-python = ">=3.10,<=3.13"
 dependencies = [
     # Any dependencies for jobs and pipelines in this project can be added here
